@@ -8,10 +8,15 @@ public class Reel : MonoBehaviour
     private RectTransform[] symbols;
     [SerializeField] private float bottomLimit = -700f;
 
+    private bool shouldStop;
+    private Symbol.SymbolType targetSymbolType;
+    [SerializeField] private RectTransform centerMarker;
+
+    private const float centerY = -152f;
+
 
     private void Start()
     {
-        StartSpin();
         symbols = GetComponentsInChildren<RectTransform>();
     }
     public void StartSpin()
@@ -41,6 +46,19 @@ public class Reel : MonoBehaviour
 
                 symbol.localPosition = new Vector3(symbol.localPosition.x, highestY + symbolSpacing, symbol.localPosition.z);
             }
+
+            if (shouldStop)
+            {
+                Symbol symbolComponent = symbol.GetComponent<Symbol>();
+
+                if (symbolComponent != null && symbolComponent.Type == targetSymbolType && IsCenterNear(symbol))
+                {
+                    SnapSymbolToCenter(symbol);
+
+                    isSpinning = false;
+                    shouldStop = false;
+                }
+            }
         }
 
     }
@@ -63,4 +81,31 @@ public class Reel : MonoBehaviour
         }
         return highestY;
     }
+
+    public void StopSpin(Symbol.SymbolType symbolType)
+    {
+        targetSymbolType = symbolType;
+        shouldStop = true;
+    }
+
+    private bool IsCenterNear(RectTransform symbol)
+    {
+        return Mathf.Abs(symbol.position.y - centerMarker.position.y) < 10f;
+    }
+
+    private void SnapSymbolToCenter(RectTransform targetSymbol)
+    {
+        float offset = centerY - targetSymbol.localPosition.y;
+
+        foreach (RectTransform symbol in symbols)
+        {
+            if (symbol == transform)
+            {
+                continue;
+            }
+
+            symbol.localPosition += Vector3.up * offset;
+        }
+    }
+
 }
