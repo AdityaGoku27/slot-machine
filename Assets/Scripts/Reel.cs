@@ -14,6 +14,8 @@ public class Reel : MonoBehaviour
 
     private const float centerY = -152f;
 
+    public bool IsSpinning => isSpinning;
+
 
     private void Start()
     {
